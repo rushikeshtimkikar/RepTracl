@@ -45,6 +45,7 @@ export interface ActiveWorkout {
   templateId?: string;
   name: string;
   startedAt: string;
+  elapsedSeconds?: number;
   pausedAt?: string;
   exercises: WorkoutExercise[];
 }
