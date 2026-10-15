@@ -2,28 +2,30 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Card, ProgressBar, Screen, SectionTitle } from '@/components/Ui';
 import { colors, spacing } from '@/constants/Colors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 export default function ProgressScreen() {
+  const { theme } = usePreferences();
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.eyebrow}>INSIGHTS</Text>
-        <Text style={styles.title}>Your progress</Text>
+        <Text style={[styles.eyebrow, { color: theme.accent }]}>INSIGHTS</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Your progress</Text>
         <Text style={styles.subtitle}>Small improvements add up.</Text>
         <View style={styles.filters}><Text style={styles.filterActive}>4 WEEKS</Text><Text style={styles.filter}>3 MONTHS</Text><Text style={styles.filter}>ALL TIME</Text></View>
         <Card style={styles.chartCard}>
-          <Text style={styles.cardLabel}>BODY WEIGHT</Text>
-          <Text style={styles.metric}>86.0 <Text style={styles.unit}>kg</Text></Text>
-          <Text style={styles.change}>↓ 0.8 kg since last month</Text>
-          <View style={styles.chart}><View style={styles.chartLine}><View style={styles.point} /><View style={styles.point} /><View style={styles.point} /><View style={styles.point} /><View style={styles.point} /></View></View>
+          <Text style={[styles.cardLabel, { color: theme.textMuted }]}>BODY WEIGHT</Text>
+          <Text style={[styles.metric, { color: theme.text }]}>86.0 <Text style={styles.unit}>kg</Text></Text>
+          <Text style={[styles.change, { color: theme.accent }]}>↓ 0.8 kg since last month</Text>
+          <View style={styles.chart}><View style={[styles.chartLine, { borderBottomColor: theme.accent }]}>{[1, 2, 3, 4, 5].map((point) => <View key={point} style={[styles.point, { backgroundColor: theme.accent, borderColor: theme.surface }]} />)}</View></View>
           <View style={styles.chartLabels}><Text>Sep 20</Text><Text>Oct 14</Text></View>
         </Card>
         <SectionTitle title="Training overview" />
         <View style={styles.statsRow}>
-          <Card style={styles.stat}><Text style={styles.cardLabel}>SESSIONS</Text><Text style={styles.statValue}>12</Text><Text style={styles.statCaption}>this month</Text></Card>
-          <Card style={styles.stat}><Text style={styles.cardLabel}>VOLUME</Text><Text style={styles.statValue}>18.4k</Text><Text style={styles.statCaption}>kg lifted</Text></Card>
+          <Card style={styles.stat}><Text style={[styles.cardLabel, { color: theme.textMuted }]}>SESSIONS</Text><Text style={[styles.statValue, { color: theme.text }]}>12</Text><Text style={styles.statCaption}>this month</Text></Card>
+          <Card style={styles.stat}><Text style={[styles.cardLabel, { color: theme.textMuted }]}>VOLUME</Text><Text style={[styles.statValue, { color: theme.text }]}>18.4k</Text><Text style={styles.statCaption}>kg lifted</Text></Card>
         </View>
-        <Card><View style={styles.consistency}><View><Text style={styles.cardLabel}>CONSISTENCY</Text><Text style={styles.consistencyText}>You&apos;re on track</Text></View><Text style={styles.consistencyScore}>86%</Text></View><ProgressBar progress={0.86} /></Card>
+        <Card><View style={styles.consistency}><View><Text style={[styles.cardLabel, { color: theme.textMuted }]}>CONSISTENCY</Text><Text style={[styles.consistencyText, { color: theme.text }]}>You&apos;re on track</Text></View><Text style={[styles.consistencyScore, { color: theme.accent }]}>86%</Text></View><ProgressBar progress={0.86} /></Card>
       </ScrollView>
     </Screen>
   );

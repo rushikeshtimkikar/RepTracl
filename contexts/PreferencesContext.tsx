@@ -13,6 +13,7 @@ export interface ThemePreferences {
   background: string;
   surface: string;
   text: string;
+  textMuted: string;
 }
 
 export interface WidgetPreferences {
@@ -25,6 +26,7 @@ const defaultTheme: ThemePreferences = {
   background: colors.background,
   surface: colors.surface,
   text: colors.text,
+  textMuted: colors.textMuted,
 };
 
 const defaultWidgets: WidgetPreferences = {
@@ -42,6 +44,7 @@ interface PreferencesContextValue {
   profileName: string;
   isLoading: boolean;
   updateThemeColor: (key: ThemeColorKey, value: string) => void;
+  resetTheme: () => void;
   updateWidgets: (preferences: WidgetPreferences) => void;
   updateProfileName: (name: string) => void;
 }
@@ -80,6 +83,13 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     });
   }
 
+  function resetTheme() {
+    setTheme(defaultTheme);
+    void saveStored(storageKeys.theme, defaultTheme).catch(() => {
+      Alert.alert('Could not reset theme', 'Your original colors could not be restored.');
+    });
+  }
+
   function updateWidgets(nextWidgets: WidgetPreferences) {
     setWidgets(nextWidgets);
     void saveStored(storageKeys.homeWidgets, nextWidgets).catch(() => {
@@ -95,7 +105,7 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
   }
 
   const value = useMemo(
-    () => ({ theme, widgets, profileName, isLoading, updateThemeColor, updateWidgets, updateProfileName }),
+    () => ({ theme, widgets, profileName, isLoading, updateThemeColor, resetTheme, updateWidgets, updateProfileName }),
     [theme, widgets, profileName, isLoading],
   );
 

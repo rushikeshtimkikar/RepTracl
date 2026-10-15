@@ -22,6 +22,7 @@ import {
   WorkoutSet,
 } from '@/models/fitness';
 import { loadStored, saveStored, storageKeys } from '@/services/storage';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 const defaultRestSeconds = 90;
 const legExerciseIds = ['squat'];
@@ -62,6 +63,7 @@ function formatDuration(totalSeconds: number): number {
 }
 
 export default function WorkoutScreen() {
+  const { theme } = usePreferences();
   const [activeWorkout, setActiveWorkout] = useState<ActiveWorkout | null>(null);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
   const [isPaused, setIsPaused] = useState(false);
@@ -279,30 +281,30 @@ export default function WorkoutScreen() {
   }
 
   if (isLoading) {
-    return <Screen><View style={styles.center}><Text style={styles.subtitle}>Loading your workout...</Text></View></Screen>;
+    return <Screen><View style={styles.center}><Text style={[styles.subtitle, { color: theme.textMuted }]}>Loading your workout...</Text></View></Screen>;
   }
 
   if (!activeWorkout) {
     return (
       <Screen>
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.eyebrow}>TRAINING</Text>
-          <Text style={styles.title}>Your workouts</Text>
-          <Text style={styles.subtitle}>Build momentum, one session at a time.</Text>
-          <Card style={styles.startCard}>
-            <Text style={styles.cardKicker}>UP NEXT</Text>
-            <Text style={styles.cardTitle}>Legs</Text>
-            <Text style={styles.subtitle}>Back Squat · 3 working sets</Text>
+          <Text style={[styles.eyebrow, { color: theme.accent }]}>TRAINING</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Your workouts</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Build momentum, one session at a time.</Text>
+          <Card style={[styles.startCard, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.cardKicker, { color: theme.accent }]}>UP NEXT</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Legs</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>Back Squat · 3 working sets</Text>
             <PrimaryButton label="Start session" onPress={startWorkout} />
           </Card>
           <SectionTitle title="Recent sessions" action={`${completedWorkouts.length} saved`} />
           {completedWorkouts.length === 0 ? (
-            <Card><Text style={styles.libraryHint}>Finished workouts will appear here. Cancelled sessions are never counted.</Text></Card>
+            <Card><Text style={[styles.libraryHint, { color: theme.textMuted }]}>Finished workouts will appear here. Cancelled sessions are never counted.</Text></Card>
           ) : (
             completedWorkouts.slice(0, 5).map((workout) => (
               <Card key={workout.id} style={styles.historyRow}>
-                <View><Text style={styles.templateName}>{workout.name}</Text><Text style={styles.historyMeta}>{new Date(workout.completedAt).toLocaleDateString()} · {workout.durationMinutes} min</Text></View>
-                <Text style={styles.historyCount}>{workout.exercises.reduce((total, exercise) => total + exercise.sets.filter((set) => set.completed).length, 0)} sets</Text>
+                <View><Text style={[styles.templateName, { color: theme.text }]}>{workout.name}</Text><Text style={[styles.historyMeta, { color: theme.textMuted }]}>{new Date(workout.completedAt).toLocaleDateString()} · {workout.durationMinutes} min</Text></View>
+                <Text style={[styles.historyCount, { color: theme.accent }]}>{workout.exercises.reduce((total, exercise) => total + exercise.sets.filter((set) => set.completed).length, 0)} sets</Text>
               </Card>
             ))
           )}
@@ -315,17 +317,17 @@ export default function WorkoutScreen() {
     <Screen>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.sessionHeader}>
-          <View><Text style={styles.eyebrow}>ACTIVE SESSION</Text><Text style={styles.title}>{activeWorkout.name}</Text></View>
+          <View><Text style={[styles.eyebrow, { color: theme.accent }]}>ACTIVE SESSION</Text><Text style={[styles.title, { color: theme.text }]}>{activeWorkout.name}</Text></View>
           <Pressable onPress={cancelWorkout}><Text style={styles.cancelText}>Cancel</Text></Pressable>
         </View>
         <Card style={styles.timerCard}>
-          <View><Text style={styles.cardKicker}>{isPaused ? 'PAUSED' : 'SESSION TIME'}</Text><Text style={styles.timer}>{formatTime(elapsedSeconds)}</Text></View>
-          <Pressable style={styles.pauseButton} onPress={() => setIsPaused((paused) => !paused)}><Text style={styles.pauseText}>{isPaused ? 'Resume' : 'Pause'}</Text></Pressable>
+          <View><Text style={[styles.cardKicker, { color: theme.accent }]}>{isPaused ? 'PAUSED' : 'SESSION TIME'}</Text><Text style={[styles.timer, { color: theme.text }]}>{formatTime(elapsedSeconds)}</Text></View>
+          <Pressable style={[styles.pauseButton, { borderColor: theme.background }]} onPress={() => setIsPaused((paused) => !paused)}><Text style={[styles.pauseText, { color: theme.text }]}>{isPaused ? 'Resume' : 'Pause'}</Text></Pressable>
         </Card>
         {restSeconds > 0 ? (
-          <Card style={styles.restCard}>
-            <View><Text style={styles.cardKicker}>REST TIMER</Text><Text style={styles.restTimer}>{formatTime(restSeconds)}</Text></View>
-            <Pressable onPress={() => setRestSeconds(0)}><Text style={styles.skipText}>Skip</Text></Pressable>
+          <Card style={[styles.restCard, { backgroundColor: theme.surface }]}>
+            <View><Text style={[styles.cardKicker, { color: theme.accent }]}>REST TIMER</Text><Text style={[styles.restTimer, { color: theme.accent }]}>{formatTime(restSeconds)}</Text></View>
+            <Pressable onPress={() => setRestSeconds(0)}><Text style={[styles.skipText, { color: theme.accent }]}>Skip</Text></Pressable>
           </Card>
         ) : null}
         <SectionTitle title="Exercises" action={`${activeWorkout.exercises.length} total`} />
@@ -334,18 +336,18 @@ export default function WorkoutScreen() {
           if (!exercise) return null;
           const completedSets = workoutExercise.sets.filter((set) => set.completed).length;
           return (
-            <Card key={workoutExercise.exerciseId} style={styles.exerciseCard}>
+            <Card key={workoutExercise.exerciseId} style={[styles.exerciseCard, { backgroundColor: theme.surface }]}>
               <View style={styles.exerciseHeader}>
-                <View><Text style={styles.exerciseName}>{exercise.name}</Text><Text style={styles.exerciseMeta}>{exercise.muscleGroup} · {completedSets}/{workoutExercise.sets.length} complete</Text></View>
+                <View><Text style={[styles.exerciseName, { color: theme.text }]}>{exercise.name}</Text><Text style={[styles.exerciseMeta, { color: theme.textMuted }]}>{exercise.muscleGroup} · {completedSets}/{workoutExercise.sets.length} complete</Text></View>
                 <Pressable onPress={() => removeExercise(exercise.id)}><Text style={styles.removeText}>Remove</Text></Pressable>
               </View>
               <View style={styles.tableHeader}><Text style={styles.setColumn}>SET</Text><Text style={styles.inputColumn}>KG</Text><Text style={styles.inputColumn}>REPS</Text><Text style={styles.doneColumn}>DONE</Text></View>
               {workoutExercise.sets.map((set, index) => (
                 <View key={set.id} style={styles.setRow}>
-                  <Text style={[styles.setNumber, set.type === 'warmup' && styles.warmupText]}>{index + 1}</Text>
-                  <TextInput keyboardType="decimal-pad" selectTextOnFocus value={set.weightKg?.toString() ?? ''} onChangeText={(value) => updateSet(exercise.id, set.id, 'weightKg', value)} style={styles.input} placeholder="0" placeholderTextColor={colors.textFaint} />
-                  <TextInput keyboardType="number-pad" selectTextOnFocus value={set.reps?.toString() ?? ''} onChangeText={(value) => updateSet(exercise.id, set.id, 'reps', value)} style={styles.input} placeholder="0" placeholderTextColor={colors.textFaint} />
-                  <Pressable onPress={() => toggleSet(exercise.id, set.id)} style={[styles.checkButton, set.completed && styles.checkedButton]}><Text style={[styles.checkMark, set.completed && styles.checkedMark]}>✓</Text></Pressable>
+                  <Text style={[styles.setNumber, { color: theme.textMuted }]}>{index + 1}</Text>
+                  <TextInput keyboardType="decimal-pad" selectTextOnFocus value={set.weightKg?.toString() ?? ''} onChangeText={(value) => updateSet(exercise.id, set.id, 'weightKg', value)} style={[styles.input, { backgroundColor: theme.background, borderColor: theme.background, color: theme.text }]} placeholder="0" placeholderTextColor={theme.textMuted} />
+                  <TextInput keyboardType="number-pad" selectTextOnFocus value={set.reps?.toString() ?? ''} onChangeText={(value) => updateSet(exercise.id, set.id, 'reps', value)} style={[styles.input, { backgroundColor: theme.background, borderColor: theme.background, color: theme.text }]} placeholder="0" placeholderTextColor={theme.textMuted} />
+                  <Pressable onPress={() => toggleSet(exercise.id, set.id)} style={[styles.checkButton, { borderColor: theme.background }, set.completed && { backgroundColor: theme.accent, borderColor: theme.accent }]}><Text style={[styles.checkMark, { color: theme.textMuted }, set.completed && { color: theme.background }]}>✓</Text></Pressable>
                 </View>
               ))}
               <Pressable onPress={() => addSet(exercise.id)} style={styles.addSetButton}><Text style={styles.addSetText}>+ Add set</Text></Pressable>

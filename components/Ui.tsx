@@ -11,14 +11,15 @@ export function Screen({ children }: PropsWithChildren) {
 
 export function Card({ children, style }: PropsWithChildren<{ style?: object }>) {
   const { theme } = usePreferences();
-  return <View style={[styles.card, { backgroundColor: theme.surface }, style]}>{children}</View>;
+  return <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.background }, style]}>{children}</View>;
 }
 
 export function SectionTitle({ title, action }: { title: string; action?: string }) {
+  const { theme } = usePreferences();
   return (
     <View style={styles.sectionTitle}>
-      <Text style={styles.sectionHeading}>{title}</Text>
-      {action ? <Text style={styles.sectionAction}>{action}</Text> : null}
+      <Text style={[styles.sectionHeading, { color: theme.text }]}>{title}</Text>
+      {action ? <Text style={[styles.sectionAction, { color: theme.accent }]}>{action}</Text> : null}
     </View>
   );
 }
@@ -26,7 +27,7 @@ export function SectionTitle({ title, action }: { title: string; action?: string
 export function ProgressBar({ progress, color = colors.lime }: { progress: number; color?: string }) {
   const { theme } = usePreferences();
   return (
-    <View style={styles.progressTrack}>
+    <View style={[styles.progressTrack, { backgroundColor: theme.background }]}>
       <View style={[styles.progressFill, { width: `${Math.min(100, Math.max(0, progress * 100))}%`, backgroundColor: color === colors.lime ? theme.accent : color }]} />
     </View>
   );
@@ -52,8 +53,8 @@ export function PrimaryButton({
         disabled && styles.disabledButton,
         pressed && styles.pressed,
       ]}>
-      <Text style={styles.primaryButtonText}>{label}</Text>
-      <Text style={styles.buttonArrow}>→</Text>
+      <Text style={[styles.primaryButtonText, { color: theme.background }]}>{label}</Text>
+      <Text style={[styles.buttonArrow, { color: theme.background }]}>→</Text>
     </Pressable>
   );
 }
