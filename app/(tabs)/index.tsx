@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Card, PrimaryButton, ProgressBar, Screen, SectionTitle } from '@/components/Ui';
 import { colors, radii, spacing } from '@/constants/Colors';
+import { HomeWidgetKey, usePreferences } from '@/contexts/PreferencesContext';
 import { defaultProfile } from '@/data/defaults';
 
 const weekdays = [
@@ -18,7 +19,57 @@ const weekdays = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { theme, widgets, profileName } = usePreferences();
   const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  function renderWidget(key: HomeWidgetKey) {
+    if (!widgets.visible[key]) return null;
+    if (key === 'weekly-schedule') {
+      return (
+        <View key={key}>
+          <SectionTitle title="This week" action="Edit schedule" />
+          <Card style={styles.scheduleCard}>
+            <View style={styles.weekRow}>
+              {weekdays.map((item, index) => (
+                <View key={`${item.day}-${index}`} style={styles.dayItem}>
+                  <Text style={[styles.dayLabel, item.active && styles.activeText]}>{item.day}</Text>
+                  <View style={[styles.dayDot, item.done && styles.doneDot, item.active && styles.activeDot]}>
+                    {item.done ? <Text style={styles.check}>✓</Text> : null}
+                  </View>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.scheduleCaption}>2 of 4 workouts completed</Text>
+            <ProgressBar progress={0.5} />
+          </Card>
+        </View>
+      );
+    }
+    if (key === 'streak') {
+      return (
+        <View key={key} style={styles.twoColumn}>
+          <Card style={styles.smallCard}>
+            <Text style={styles.cardLabel}>BODY WEIGHT</Text>
+            <Text style={styles.metricValue}>{defaultProfile.bodyWeightKg}<Text style={styles.metricUnit}> kg</Text></Text>
+            <Text style={styles.trend}>↓ 0.8 kg this month</Text>
+          </Card>
+          <Card style={styles.smallCard}>
+            <Text style={styles.cardLabel}>STREAK</Text>
+            <Text style={styles.metricValue}>12<Text style={styles.metricUnit}> days</Text></Text>
+            <Text style={styles.trend}>Personal best</Text>
+          </Card>
+        </View>
+      );
+    }
+    return (
+      <View key={key}>
+        <SectionTitle title="Quick actions" />
+        <View style={styles.actions}>
+          {['Log weight', 'Add water', 'Log workout'].map((label) => <View key={label} style={styles.action}><View style={[styles.actionIcon, { borderColor: theme.accent }]}><Text style={[styles.actionPlus, { color: theme.accent }]}>+</Text></View><Text style={styles.actionLabel}>{label}</Text></View>)}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <Screen>
@@ -26,7 +77,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.eyebrow}>{date.toUpperCase()}</Text>
-            <Text style={styles.greeting}>Good evening, {defaultProfile.name}</Text>
+            <Text style={styles.greeting}>Good evening, {profileName}</Text>
           </View>
           <View style={styles.avatar}><Text style={styles.avatarText}>A</Text></View>
         </View>
@@ -43,34 +94,7 @@ export default function HomeScreen() {
           <PrimaryButton label="Start workout" onPress={() => router.push('/workout')} />
         </Card>
 
-        <SectionTitle title="This week" action="Edit schedule" />
-        <Card style={styles.scheduleCard}>
-          <View style={styles.weekRow}>
-            {weekdays.map((item, index) => (
-              <View key={`${item.day}-${index}`} style={styles.dayItem}>
-                <Text style={[styles.dayLabel, item.active && styles.activeText]}>{item.day}</Text>
-                <View style={[styles.dayDot, item.done && styles.doneDot, item.active && styles.activeDot]}>
-                  {item.done ? <Text style={styles.check}>✓</Text> : null}
-                </View>
-              </View>
-            ))}
-          </View>
-          <Text style={styles.scheduleCaption}>2 of 4 workouts completed</Text>
-          <ProgressBar progress={0.5} />
-        </Card>
-
-        <View style={styles.twoColumn}>
-          <Card style={styles.smallCard}>
-            <Text style={styles.cardLabel}>BODY WEIGHT</Text>
-            <Text style={styles.metricValue}>{defaultProfile.bodyWeightKg}<Text style={styles.metricUnit}> kg</Text></Text>
-            <Text style={styles.trend}>↓ 0.8 kg this month</Text>
-          </Card>
-          <Card style={styles.smallCard}>
-            <Text style={styles.cardLabel}>STREAK</Text>
-            <Text style={styles.metricValue}>12<Text style={styles.metricUnit}> days</Text></Text>
-            <Text style={styles.trend}>Personal best</Text>
-          </Card>
-        </View>
+        {widgets.order.map(renderWidget)}
 
         <SectionTitle title="Daily nutrition" action="Log food" />
         <Card>
@@ -81,11 +105,6 @@ export default function HomeScreen() {
           <ProgressBar progress={0.63} />
           <View style={styles.macroRow}><Text style={styles.macroText}>Protein <Text style={styles.macroValue}>112 / {defaultProfile.proteinTargetGrams}g</Text></Text><Text style={styles.macroText}>Water <Text style={styles.macroValue}>1.5 / 2.5L</Text></Text></View>
         </Card>
-
-        <SectionTitle title="Quick actions" />
-        <View style={styles.actions}>
-          {['Log weight', 'Add water', 'Log workout'].map((label) => <View key={label} style={styles.action}><View style={styles.actionIcon}><Text style={styles.actionPlus}>+</Text></View><Text style={styles.actionLabel}>{label}</Text></View>)}
-        </View>
       </ScrollView>
     </Screen>
   );

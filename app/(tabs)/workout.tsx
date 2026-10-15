@@ -70,6 +70,7 @@ export default function WorkoutScreen() {
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   useEffect(() => {
     async function restoreWorkout() {
@@ -145,6 +146,11 @@ export default function WorkoutScreen() {
   }
 
   function toggleSet(exerciseId: string, setId: string) {
+    const currentSet = activeWorkout?.exercises
+      .find((exercise) => exercise.exerciseId === exerciseId)
+      ?.sets.find((set) => set.id === setId);
+    const completingSet = currentSet ? !currentSet.completed : false;
+
     updateWorkout((workout) => ({
       ...workout,
       exercises: workout.exercises.map((exercise) =>
@@ -152,13 +158,15 @@ export default function WorkoutScreen() {
           ? {
               ...exercise,
               sets: exercise.sets.map((set) =>
-                set.id === setId ? { ...set, completed: !set.completed } : set,
+                set.id === setId
+                  ? { ...set, completed: !set.completed }
+                  : set,
               ),
             }
           : exercise,
       ),
     }));
-    setRestSeconds(defaultRestSeconds);
+    if (completingSet) setRestSeconds(defaultRestSeconds);
   }
 
   function updateSet(
@@ -217,7 +225,17 @@ export default function WorkoutScreen() {
   }
 
   function finishWorkout() {
-    if (!activeWorkout) return;
+    if (!activeWorkout || isFinishing) return;
+    const completedSetCount = activeWorkout.exercises.reduce(
+      (total, exercise) => total + exercise.sets.filter((set) => set.completed).length,
+      0,
+    );
+    if (completedSetCount === 0) {
+      Alert.alert('Complete a set first', 'Mark at least one set as done before finishing this workout.');
+      return;
+    }
+
+    setIsFinishing(true);
     const completed: CompletedWorkout = {
       id: activeWorkout.id,
       name: activeWorkout.name,
@@ -238,6 +256,8 @@ export default function WorkoutScreen() {
       Alert.alert('Workout complete', `${completed.name} saved to your workout history.`);
     }).catch(() => {
       Alert.alert('Could not finish workout', 'The completed session was not saved. Please try again.');
+    }).finally(() => {
+      setIsFinishing(false);
     });
   }
 
@@ -333,7 +353,11 @@ export default function WorkoutScreen() {
           );
         })}
         <Pressable onPress={() => setShowExercisePicker(true)} style={styles.addExerciseButton}><Text style={styles.addExerciseText}>+ Add exercise</Text></Pressable>
-        <PrimaryButton label="Finish workout" onPress={finishWorkout} />
+        <PrimaryButton
+          disabled={isFinishing}
+          label={isFinishing ? 'Saving workout...' : 'Finish workout'}
+          onPress={finishWorkout}
+        />
       </ScrollView>
       <Modal visible={showExercisePicker} animationType="slide" onRequestClose={() => setShowExercisePicker(false)}>
         <Screen>

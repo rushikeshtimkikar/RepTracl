@@ -6,6 +6,8 @@ export const storageKeys = {
   activeWorkout: '@reptrack/active-workout',
   completedWorkouts: '@reptrack/completed-workouts',
   bodyWeight: '@reptrack/body-weight',
+  theme: '@reptrack/theme',
+  homeWidgets: '@reptrack/home-widgets',
 } as const;
 
 export async function loadStored<T>(key: string, fallback: T): Promise<T> {

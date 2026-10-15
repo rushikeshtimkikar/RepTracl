@@ -2,13 +2,16 @@ import { PropsWithChildren } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing } from '@/constants/Colors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 export function Screen({ children }: PropsWithChildren) {
-  return <View style={styles.screen}>{children}</View>;
+  const { theme } = usePreferences();
+  return <View style={[styles.screen, { backgroundColor: theme.background }]}>{children}</View>;
 }
 
 export function Card({ children, style }: PropsWithChildren<{ style?: object }>) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const { theme } = usePreferences();
+  return <View style={[styles.card, { backgroundColor: theme.surface }, style]}>{children}</View>;
 }
 
 export function SectionTitle({ title, action }: { title: string; action?: string }) {
@@ -21,16 +24,34 @@ export function SectionTitle({ title, action }: { title: string; action?: string
 }
 
 export function ProgressBar({ progress, color = colors.lime }: { progress: number; color?: string }) {
+  const { theme } = usePreferences();
   return (
     <View style={styles.progressTrack}>
-      <View style={[styles.progressFill, { width: `${Math.min(100, Math.max(0, progress * 100))}%`, backgroundColor: color }]} />
+      <View style={[styles.progressFill, { width: `${Math.min(100, Math.max(0, progress * 100))}%`, backgroundColor: color === colors.lime ? theme.accent : color }]} />
     </View>
   );
 }
 
-export function PrimaryButton({ label, onPress }: { label: string; onPress?: () => void }) {
+export function PrimaryButton({
+  label,
+  onPress,
+  disabled = false,
+}: {
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
+  const { theme } = usePreferences();
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.primaryButton,
+        { backgroundColor: theme.accent },
+        disabled && styles.disabledButton,
+        pressed && styles.pressed,
+      ]}>
       <Text style={styles.primaryButtonText}>{label}</Text>
       <Text style={styles.buttonArrow}>→</Text>
     </Pressable>
@@ -62,5 +83,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: { color: colors.background, fontSize: 15, fontWeight: '800' },
   buttonArrow: { color: colors.background, fontSize: 20, fontWeight: '700', marginLeft: spacing.sm },
+  disabledButton: { opacity: 0.5 },
   pressed: { opacity: 0.75 },
 });

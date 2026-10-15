@@ -3,15 +3,17 @@ import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import Colors, { colors } from '@/constants/Colors';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 export default function TabLayout() {
+  const { theme } = usePreferences();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.dark.tabIconSelected,
+        tabBarActiveTintColor: theme.accent,
         tabBarInactiveTintColor: Colors.dark.tabIconDefault,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { backgroundColor: theme.surface, borderTopColor: theme.background }],
         tabBarLabelStyle: styles.tabLabel,
       }}>
       <Tabs.Screen
